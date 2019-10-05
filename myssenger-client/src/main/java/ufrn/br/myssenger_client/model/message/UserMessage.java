@@ -1,8 +1,8 @@
-package ufrn.br.myssenger_client.model;
+package ufrn.br.myssenger_client.model.message;
 
 import java.io.Serializable;
 
-public class User implements Serializable {
+public class UserMessage implements Serializable {
 	private static final long serialVersionUID = 65695292432299599L;
 	private String username;
 	private String password;
@@ -18,7 +18,7 @@ public class User implements Serializable {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	public User(String username, String password) {
+	public UserMessage(String username, String password) {
 		super();
 		this.username = username;
 		this.password = password;

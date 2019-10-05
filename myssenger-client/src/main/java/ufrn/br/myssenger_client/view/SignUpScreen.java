@@ -160,14 +160,14 @@ public class SignUpScreen extends JPanel {
 				error.setVisible(true);
 				return;
 			}
-			
-			if(confirm.equals(password)) {
-				client.setLoadingScreen();
-				new Worker(username, password).execute();
-			}
-			else {
+			if(!confirm.equals(password)) {
 				error.setText("Confirmation doesn't match password!");
+				error.setVisible(true);
+				return;
 			}
+			
+			client.setLoadingScreen();
+			new Worker(username, password).execute();		
 		}
 	}
 	
@@ -183,12 +183,21 @@ public class SignUpScreen extends JPanel {
 
 		@Override
 		protected Void doInBackground() throws Exception {
-			service.signUp(username, password);
-			client.setSignInScreen();
-			JOptionPane.showMessageDialog(client.getWindow(),
-					"User successfully signed up!",
-				    "Success",
-				    JOptionPane.PLAIN_MESSAGE);
+			try {
+				service.signUp(username, password);
+				client.setSignInScreen();
+				resetFields();
+				JOptionPane.showMessageDialog(client.getWindow(),
+						"User successfully signed up!",
+					    "Success",
+					    JOptionPane.PLAIN_MESSAGE);
+			} catch (Exception e) {
+				client.setSignUpScreen();
+				JOptionPane.showMessageDialog(client.getWindow(),
+						e.getMessage(),
+					    "Error",
+					    JOptionPane.ERROR_MESSAGE);
+			}
 			return null;
 		}
 	}

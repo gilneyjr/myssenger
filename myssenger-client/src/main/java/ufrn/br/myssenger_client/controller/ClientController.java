@@ -1,27 +1,22 @@
 package ufrn.br.myssenger_client.controller;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutput;
-import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeoutException;
 
-import ufrn.br.myssenger_client.model.User;
+import org.json.JSONObject;
 
 
 public class ClientController {
 	private DatagramSocket socket;
-	private static final String SERVERNAME =  "ec2-52-14-230-186.us-east-2.compute.amazonaws.com";
+	private static final String SERVERNAME =  "ec2-3-15-213-254.us-east-2.compute.amazonaws.com";
 	private static final int SERVERPORT = 9000;
 	private static final int CLIENTPORT = 9001;
-	private static final int MAX_MSG_SIZE = 1024;
+	//private static final int MAX_MSG_SIZE = 1024;
 	
 	public void send(String msg) {
 		new Thread(() -> {
@@ -55,57 +50,65 @@ public class ClientController {
 		System.out.println("[" + msg + "]");
 	}
 	
-	public void signUp(String username, String password) {
-		String msg = "sign_up\n\r" + username + "\n\r" + password + "\n\r\n\r";
-		
-		try {
-			InetAddress inetAddress = InetAddress.getByName(SERVERNAME);
-			System.out.println("Server ip: " + inetAddress.getHostAddress());
-			byte[] bytesMsg = msg.getBytes();
-			DatagramPacket packet = new DatagramPacket(bytesMsg, bytesMsg.length, inetAddress, SERVERPORT);
-			socket.send(packet);
+//	public void signUp(String username, String password) {
+//		String msg = "sign_up\n\r" + username + "\n\r" + password + "\n\r\n\r";
+//		
+//		try {
+//			InetAddress inetAddress = InetAddress.getByName(SERVERNAME);
+//			System.out.println("Server ip: " + inetAddress.getHostAddress());
+//			byte[] bytesMsg = msg.getBytes();
+//			DatagramPacket packet = new DatagramPacket(bytesMsg, bytesMsg.length, inetAddress, SERVERPORT);
+//			socket.send(packet);
+//			
+//			bytesMsg = new byte[MAX_MSG_SIZE];
+//			packet = new DatagramPacket(bytesMsg, bytesMsg.length);
+//			socket.receive(packet);
+//			System.out.println("received from server: [" + new String(packet.getData()) + "]");
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		
+//		try {
+//			Thread.sleep(2000);
+//		} catch (InterruptedException e) {}
+//	}
+	
+	
+	
+	// New part =======================================================================
+
+	public void signUp(String username, String password) throws Exception {
+		try(RPCClient rpc = new RPCClient()) {
+			JSONObject obj = new JSONObject();
+			obj.put("type", "sign_up");
+			obj.put("username", username);
+			obj.put("password", password);			
 			
-			bytesMsg = new byte[MAX_MSG_SIZE];
-			packet = new DatagramPacket(bytesMsg, bytesMsg.length);
-			socket.receive(packet);
-			System.out.println("received from server: [" + new String(packet.getData()) + "]");
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			byte[] response = rpc.call(obj.toString().getBytes("UTF-8")); 			
+			
+			// Ver exception
+			JSONObject resp_obj = new JSONObject(new String(response, "UTF-8"));
+			
+			// Error Detection
+			if(resp_obj.getString("type").equals("response"))
+				if(resp_obj.getString("status").equals("error"))
+					throw new Exception(resp_obj.getString("msg"));
+				else if(resp_obj.getString("status").equals("ok"))
+					/* Empty */;
+				else
+					throw new Exception("Unexpected error! Please try again");
+			else
+				throw new Exception("Unexpected error! Please try again");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TimeoutException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {}
-	}
-	
-	
-	
-	// New part
-	private byte[] convertToBytes(Object object) {
-	    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
-	         ObjectOutput out = new ObjectOutputStream(bos)) {
-	        out.writeObject(object);
-	        return bos.toByteArray();
-	    } catch(IOException e) { return null; }
-	}
-	
-	private Object convertFromBytes(byte[] bytes) {
-	    try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-	         ObjectInput in = new ObjectInputStream(bis)) {
-	        return in.readObject();
-	    } catch(IOException | ClassNotFoundException e) { return null; }
-	}
-	
-	public void signUp(User u) {
-		System.out.println("username: " + u.getUsername() +
-				 "; password: " + u.getPassword());
-		byte[] b = convertToBytes(u);
-		u = (User) convertFromBytes(b);
-		System.out.println("username: " + u.getUsername() +
-				"; password: " + u.getPassword());
 	}
 }
