@@ -6,8 +6,21 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import ufrn.br.myssenger_server.model.exception.UserAlreadyExistsException;
+import ufrn.br.myssenger_server.service.IService;
 
 public class Handle {
+	private IService service;
+	
+	public Handle(IService service) {
+		this.service = service;
+	}
+	
+//	public void handle(JSONObject obj) {
+//		if(obj.getString("type").equals("sign_up")) {
+//        	service.signUp(obj.getString("username"), obj.getString("password"));
+//        }
+//	}
+	
 	private static class User {
 		public String username;
 		public String password;
