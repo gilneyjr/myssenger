@@ -5,6 +5,8 @@ import org.json.JSONObject;
 
 import com.rabbitmq.client.*;
 
+import ufrn.br.myssenger_server.service.Service;
+
 public class RPCServer {
 
     private static final String RPC_QUEUE_NAME = "rpc_queue";
@@ -12,6 +14,7 @@ public class RPCServer {
     private static final String RABBITMQ_SERVER = "ec2-3-15-213-254.us-east-2.compute.amazonaws.com";
     private static final String RABBITMQ_USER = "gilneyjr";
     private static final String RABBITMQ_PASS = "1234";
+    private static final Handle handle = new Handle(new Service());
 
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
@@ -37,7 +40,7 @@ public class RPCServer {
 
                 JSONObject response = new JSONObject();
                 try {
-                    Handle.handle(new JSONObject(new String(delivery.getBody(), "UTF-8")));
+                    handle.handle(new JSONObject(new String(delivery.getBody(), "UTF-8")));
                     response.put("type", "response");
                     response.put("status", "ok");
                 } catch (JSONException e) {

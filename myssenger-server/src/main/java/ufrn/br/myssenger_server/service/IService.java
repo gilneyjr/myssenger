@@ -30,11 +30,11 @@ public interface IService {
 
 	/**
 	 * Return the user's chats.
-	 * @param token The user's token.
+	 * @param string The user's token.
 	 * @return A list of user's chats.
 	 * @throws InvalidTokenException If the given token are invalid. 
 	 */
-	public List<Chat> getChats(long token) throws InvalidTokenException;
+	public List<Chat> getChats(String token) throws InvalidTokenException;
 	
 	/**
 	 * Return a list of messages of a given chat.
@@ -44,7 +44,7 @@ public interface IService {
 	 * @throws InvalidTokenException If the given token are invalid.
 	 * @throws InvalidChatIdException If the given chatId are invalid.
 	 */
-	public List<Message> getMessagesFromChat(long token, long chatId) throws InvalidTokenException, InvalidChatIdException;
+	public List<Message> getMessagesFromChat(String token, long chatId) throws InvalidTokenException, InvalidChatIdException;
 	
 	/**
 	 * Create a new chat.
@@ -53,7 +53,7 @@ public interface IService {
 	 * @throws InvalidTokenException If the given token are invalid.
 	 * @throws UserDontExistException If the given friendName don't exists.
 	 */
-	public void newChat(long token, String friendName) throws InvalidTokenException, UserDontExistException;
+	public void newChat(String token, String friendName) throws InvalidTokenException, UserDontExistException;
 	
 	/**
 	 * Create a new message in a chat.
@@ -62,5 +62,5 @@ public interface IService {
 	 * @throws InvalidTokenException If the given token are invalid.
 	 * @throws InvalidChatIdException If the given chatId are invalid.
 	 */
-	public void newMessage(long token, long chatId) throws InvalidTokenException, InvalidChatIdException;
+	public void newMessage(String token, long chatId) throws InvalidTokenException, InvalidChatIdException;
 }
